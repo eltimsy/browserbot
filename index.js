@@ -1,11 +1,9 @@
-// frameDocument = document.querySelector('frame').contentDocument
-// otherFrame = frameDocument.querySelector('otherframe').contentDocument
-// button = otherFrame.querySelector('#submit')
-// button.click()
 (function RunNightmare(i) {
   const promise = new Promise((resolve, reject) => {
+    const doctors = []
     const Nightmare = require('nightmare');
-    const nightmare = Nightmare({ show: true, switches: {'ignore-certificate-errors': true}, webSecurity: false, alwaysOnTop: false});
+    require('nightmare-iframe-manager')(Nightmare);
+    const nightmare = Nightmare({ show: true, switches: {'ignore-certificate-errors': true}, webPreferences: {webSecurity: false}, alwaysOnTop: false});
 
     Nightmare.action('clickAll', function(selector, done) {
       this.evaluate_now((selector)=> {
@@ -29,6 +27,10 @@
       .type('#doctor-rating-form .form-control', 'I am a super bot and I can write ratings by myself')
       .click('#doctor-rating-form button')
       .wait(1000)
+      .enterIFrame('iframe[title="recaptcha challenge"]')
+      .wait('#recaptcha-verify-button')
+      .click('#recaptcha-verify-button')
+      .wait(1000)
       // .evaluate(function () {
       //   return document.querySelector('#doctor-list .search-item-doctor-name').textContent;
       // })
@@ -38,11 +40,11 @@
         resolve();
       })
       .catch(function (error) {
-        console.log('failed')
+        console.log(error)
         reject();
       });
-  }).then( () => i >= 5 || RunNightmare(i+1))
-  .catch(() => i >= 5 || RunNightmare(i+1));
+  }).then( () => i >= 2 || RunNightmare(i+1))
+  .catch(() => i >= 2 || RunNightmare(i+1));
 })(0);
 
 
